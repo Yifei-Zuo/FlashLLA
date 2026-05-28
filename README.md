@@ -1,5 +1,8 @@
 # FlashLLA
 
+[![arXiv](https://img.shields.io/badge/arXiv-2510.01450-b31b1b.svg)](https://arxiv.org/abs/2510.01450)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
+
 Efficient Triton kernels for **Local Linear Attention (LLA)** — the
 attention mechanism introduced in:
 
@@ -7,8 +10,6 @@ attention mechanism introduced in:
 > Attention For Test-Time Regression.**
 > Yifei Zuo, Yutong Yin, Zhichen Zeng, Ang Li, Banghua Zhu, Zhaoran Wang.
 > *ICLR 2026.*
-> [[arXiv]](https://arxiv.org/abs/2510.01450)
-> [[OpenReview]](https://openreview.net/forum?id=WGpzi489XY)
 
 LLA performs a local linear estimate over the running KV context at every query position, recovering both the kernel regression view of Softmax Attention and the OLS solve in Linear Attention (MesaNet) as limiting cases. FlashLLA provides a fused, causal forward/backward implementation of the operator with a built-in conjugate gradient solver for the inner ridge regression.
 
