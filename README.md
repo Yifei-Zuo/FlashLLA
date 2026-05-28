@@ -42,29 +42,44 @@ explicit `LLAFunction` (which exposes the inner normalizer `omega`) is in
 
 ## API
 
-`flashlla` exposes two entry points; both are causal.
+`flashlla` exposes two causal entry points.
 
-### `lla_attention(q, k, v, *, ridge_lambda=0.01, qk_scale=None, ...) -> Tensor`
+### `lla_attention` — functional API
 
-The recommended functional entry point. Returns the attention output `o`
-with shape `(batch, seqlen, head_dim)`.
+```python
+lla_attention(
+    q, k, v,
+    *,
+    ridge_lambda=10.0,
+    qk_scale=None,
+    delta_eps=1e-12,
+    cg_atol=1e-12,
+    cg_rtol=1e-12,
+    cg_max_iters=32,
+    cg_use_preconditioner=False,
+) -> Tensor  # (B, S, D)
+```
 
-- `q, k, v` — CUDA tensors of shape `(B, S, D)`. Inputs in fp16 / bf16 /
-  fp32 are accepted; the kernel runs in bf16 internally.
-- `ridge_lambda` — scalar `float` or a broadcastable tensor controlling
-  the ridge-regression regularizer. This is the linear↔softmax
-  interpolation knob.
-- `qk_scale` — defaults to `1 / sqrt(head_dim)`.
-- CG solver controls (`cg_atol`, `cg_rtol`, `cg_max_iters`,
-  `cg_use_preconditioner`) tune the inner ridge solve. Defaults are
-  usually fine; flip `cg_use_preconditioner=True` for ill-conditioned
-  contexts.
+| Argument | Description |
+|---|---|
+| `q, k, v` | CUDA tensors of shape `(B, S, D)`. The kernel runs in bf16 internally. |
+| `ridge_lambda` | Scalar `float` or broadcastable tensor. |
+| `qk_scale` | Defaults to `1 / sqrt(head_dim)`. |
+| `cg_*` controls | Inner conjugate-gradient solver tolerances and iteration cap. Use `cg_use_preconditioner=True` for a lower maximal iteration count. |
 
-### `LLAFunction.apply(q, k, v, ridge_lambda, qk_scale, delta_eps, cg_atol, cg_rtol, cg_max_iters, cg_use_preconditioner) -> (o, omega)`
+### `LLAFunction` — raw `autograd.Function`
 
-The raw `torch.autograd.Function`, returning both the output and the
-normalizer `omega` (useful for analysis and downstream losses that need
-the per-position regression weight).
+```python
+o, omega = LLAFunction.apply(
+    q, k, v,
+    ridge_lambda,           # tensor matching q's device/dtype
+    qk_scale,               # float
+    delta_eps,              # float
+    cg_atol, cg_rtol,       # float
+    cg_max_iters,           # int
+    cg_use_preconditioner,  # bool
+)
+```
 
 ## Numerical notes
 

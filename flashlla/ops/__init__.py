@@ -72,7 +72,7 @@ def lla_attention(
     k: torch.Tensor,
     v: torch.Tensor,
     *,
-    ridge_lambda: float | torch.Tensor = 0.01,
+    ridge_lambda: float | torch.Tensor = 10.0,
     qk_scale: float | None = None,
     delta_eps: float = 1e-12,
     cg_atol: float = 1e-12,
